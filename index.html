@@ -1,0 +1,2533 @@
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>DROXY RIDE - Driver</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1e3a5f;
+      --primary-light: #2a4d7a;
+      --primary-dark: #0f1f33;
+      --accent: #3b82f6;
+      --accent-light: #60a5fa;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --border: #e2e8f0;
+      --shadow: 0 4px 20px rgba(30, 58, 95, 0.08);
+      --shadow-lg: 0 10px 40px rgba(30, 58, 95, 0.12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0a0f1a;
+      color: var(--text);
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+
+    #app-frame {
+      max-width: 430px;
+      margin: 0 auto;
+      height: 100vh;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0,0,0,0.5);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    /* Splash */
+    #splash-screen {
+      background: var(--primary);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .splash-logo {
+      text-align: center;
+      animation: splashIn 0.8s ease-out;
+    }
+
+    .splash-logo i {
+      font-size: 72px;
+      color: white;
+      margin-bottom: 20px;
+      display: block;
+      animation: carBounce 1.5s ease-in-out infinite;
+    }
+
+    .splash-logo h1 {
+      font-size: 32px;
+      font-weight: 900;
+      color: white;
+      letter-spacing: 3px;
+    }
+
+    .splash-logo p {
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      margin-top: 8px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .splash-loader {
+      position: absolute;
+      bottom: 80px;
+      width: 200px;
+    }
+
+    .splash-loader-track {
+      height: 3px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .splash-loader-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-light);
+      border-radius: 3px;
+      animation: loadBar 2.5s ease-in-out forwards;
+    }
+
+    .splash-loader-text {
+      text-align: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 11px;
+      margin-top: 12px;
+    }
+
+    @keyframes splashIn {
+      from { opacity: 0; transform: scale(0.8) translateY(30px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes carBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    @keyframes loadBar {
+      0% { width: 0%; }
+      50% { width: 70%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse-ring {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2.5); opacity: 0; }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes countdown {
+      from { stroke-dashoffset: 0; }
+      to { stroke-dashoffset: 283; }
+    }
+
+    /* Auth Screens */
+    .auth-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 32px 24px;
+      overflow-y: auto;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .auth-header .icon-circle {
+      width: 72px;
+      height: 72px;
+      background: var(--primary);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .auth-header .icon-circle i {
+      font-size: 32px;
+      color: white;
+    }
+
+    .auth-header h2 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .auth-header p {
+      color: var(--text-light);
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      animation: slideUp 0.4s ease both;
+    }
+
+    .form-group:nth-child(2) { animation-delay: 0.05s; }
+    .form-group:nth-child(3) { animation-delay: 0.1s; }
+    .form-group:nth-child(4) { animation-delay: 0.15s; }
+    .form-group:nth-child(5) { animation-delay: 0.2s; }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-light);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      font-size: 15px;
+      font-family: inherit;
+      background: var(--card);
+      color: var(--text);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-with-icon i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light);
+      font-size: 16px;
+    }
+
+    .input-with-icon .form-input {
+      padding-left: 46px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 16px rgba(30, 58, 95, 0.3);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 8px rgba(30, 58, 95, 0.2);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-google {
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .btn-google i {
+      color: #ea4335;
+      font-size: 18px;
+    }
+
+    .btn-lg {
+      padding: 18px;
+      font-size: 16px;
+      border-radius: 16px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text-light);
+      font-size: 12px;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: auto;
+      padding-top: 20px;
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    .auth-footer a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    /* OTP */
+    .otp-inputs {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 24px 0;
+    }
+
+    .otp-inputs input {
+      width: 52px;
+      height: 56px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 700;
+      border: 2px solid var(--border);
+      border-radius: 14px;
+      background: var(--card);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .otp-inputs input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Upload */
+    .upload-box {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--card);
+    }
+
+    .upload-box:active {
+      border-color: var(--accent);
+      background: rgba(59, 130, 246, 0.03);
+    }
+
+    .upload-box i {
+      font-size: 32px;
+      color: var(--text-light);
+      margin-bottom: 10px;
+    }
+
+    .upload-box p {
+      font-size: 13px;
+      color: var(--text-light);
+    }
+
+    /* Home */
+    #home-screen {
+      background: #e8ecf1;
+    }
+
+    .map-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .map-bg {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 800px 600px at 30% 40%, rgba(59,130,246,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 500px at 70% 60%, rgba(16,185,129,0.06) 0%, transparent 70%),
+        linear-gradient(160deg, #dbe4ea 0%, #c8d4dc 30%, #b8c8d4 60%, #a8bcc8 100%);
+    }
+
+    .map-roads {
+      position: absolute;
+      inset: 0;
+    }
+
+    .map-road {
+      position: absolute;
+      background: rgba(255,255,255,0.55);
+      border-radius: 3px;
+    }
+
+    .map-road.h { height: 6px; }
+    .map-road.v { width: 6px; }
+
+    .map-building {
+      position: absolute;
+      background: rgba(180,190,200,0.4);
+      border-radius: 4px;
+      border: 1px solid rgba(160,170,180,0.3);
+    }
+
+    .map-park {
+      position: absolute;
+      background: rgba(16,185,129,0.12);
+      border-radius: 8px;
+      border: 1px solid rgba(16,185,129,0.2);
+    }
+
+    .map-water {
+      position: absolute;
+      background: rgba(59,130,246,0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(59,130,246,0.15);
+    }
+
+    .driver-marker {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .driver-marker-inner {
+      width: 52px;
+      height: 52px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(30,58,95,0.4);
+      position: relative;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .driver-marker-inner::after {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border: 2px solid var(--primary);
+      border-radius: 50%;
+      animation: pulse-ring 2s ease-out infinite;
+    }
+
+    .driver-marker-inner i {
+      color: white;
+      font-size: 20px;
+    }
+
+    .gps-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 120px;
+      height: 120px;
+      border: 2px solid rgba(59,130,246,0.15);
+      border-radius: 50%;
+      animation: pulse-ring 3s ease-out infinite;
+    }
+
+    .gps-pulse:nth-child(2) {
+      width: 180px;
+      height: 180px;
+      animation-delay: 1s;
+    }
+
+    .home-top-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      padding: 16px 16px 0;
+    }
+
+    .profile-pill {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      padding: 8px 14px 8px 8px;
+      border-radius: 50px;
+      box-shadow: var(--shadow);
+      width: fit-content;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .profile-pill:active {
+      transform: scale(0.97);
+    }
+
+    .profile-pill img {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--primary);
+    }
+
+    .profile-pill .info {
+      line-height: 1.3;
+    }
+
+    .profile-pill .name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .profile-pill .rating {
+      font-size: 11px;
+      color: var(--warning);
+    }
+
+    .gps-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      padding: 8px 14px;
+      border-radius: 50px;
+      box-shadow: var(--shadow);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--success);
+    }
+
+    .gps-badge .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .home-bottom-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      background: var(--card);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px 24px;
+      box-shadow: 0 -8px 40px rgba(0,0,0,0.1);
+      animation: slideUp 0.4s ease;
+    }
+
+    .sheet-handle {
+      width: 40px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 0 auto 16px;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 16px;
+      padding: 16px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .value {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .stat-card .sub {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: 2px;
+    }
+
+    .stat-card.secondary {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: var(--text);
+    }
+
+    .stat-card.secondary::before {
+      background: rgba(30,58,95,0.04);
+    }
+
+    .online-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+      border: 2px solid rgba(16,185,129,0.2);
+      border-radius: 16px;
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .online-toggle.offline {
+      background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+      border-color: rgba(239,68,68,0.2);
+    }
+
+    .online-toggle .status-text {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--success);
+    }
+
+    .online-toggle.offline .status-text {
+      color: var(--danger);
+    }
+
+    .toggle-switch {
+      width: 56px;
+      height: 30px;
+      background: var(--success);
+      border-radius: 15px;
+      position: relative;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch.off {
+      background: var(--danger);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 3px;
+      right: 3px;
+      transition: all 0.3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .toggle-switch.off::after {
+      right: 29px;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: var(--card);
+      padding: 8px 0 20px;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 30;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 6px 16px;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.2s;
+      border: none;
+      background: none;
+      font-family: inherit;
+    }
+
+    .nav-item.active {
+      color: var(--primary);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+    }
+
+    .nav-item span {
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Incoming Order Modal */
+    .modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .order-modal {
+      background: var(--card);
+      border-radius: 24px 24px 0 0;
+      width: 100%;
+      max-height: 85%;
+      overflow: hidden;
+      animation: slideUp 0.35s ease;
+    }
+
+    .order-modal-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 20px 24px;
+      position: relative;
+    }
+
+    .order-timer {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      width: 44px;
+      height: 44px;
+    }
+
+    .order-timer svg {
+      transform: rotate(-90deg);
+    }
+
+    .order-timer circle {
+      fill: none;
+      stroke-width: 3;
+    }
+
+    .order-timer .bg {
+      stroke: rgba(255,255,255,0.2);
+    }
+
+    .order-timer .progress {
+      stroke: white;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 0;
+      animation: countdown 15s linear forwards;
+    }
+
+    .order-timer .time {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .order-customer {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .order-customer img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3);
+      object-fit: cover;
+    }
+
+    .order-customer .name {
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .order-customer .rating {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .order-details {
+      padding: 20px 24px;
+    }
+
+    .order-route {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .route-line {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .route-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 3px solid var(--success);
+      background: white;
+      flex-shrink: 0;
+    }
+
+    .route-dot.dest {
+      border-color: var(--danger);
+    }
+
+    .route-line-bar {
+      width: 2px;
+      flex: 1;
+      background: var(--border);
+      min-height: 30px;
+    }
+
+    .route-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .route-info .place h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .route-info .place p {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .order-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .meta-item {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .meta-item i {
+      font-size: 16px;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .meta-item .val {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .meta-item .lbl {
+      font-size: 10px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    .order-fare {
+      background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .order-fare .label {
+      font-size: 12px;
+      color: var(--warning);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .order-fare .amount {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 12px;
+      padding: 0 24px 24px;
+    }
+
+    .order-actions .btn {
+      flex: 1;
+    }
+
+    /* Navigation Screen */
+    #nav-screen .map-container {
+      flex: 1;
+    }
+
+    .nav-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      padding: 16px;
+    }
+
+    .nav-card {
+      background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .nav-card .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--success);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 50px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .nav-card .status-badge i {
+      font-size: 10px;
+    }
+
+    .nav-dest {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-dest i {
+      color: var(--danger);
+      font-size: 18px;
+    }
+
+    .nav-dest h4 {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .nav-dest p {
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .nav-bottom {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      padding: 16px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-bottom .btn {
+      flex: 1;
+    }
+
+    /* History */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 24px 20px 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 150px;
+      height: 150px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .page-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .page-header p {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    .page-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .filter-tab {
+      padding: 8px 18px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      background: var(--card);
+      color: var(--text-light);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .filter-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .trip-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .trip-card:active {
+      transform: scale(0.98);
+      border-color: var(--accent);
+    }
+
+    .trip-icon {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .trip-icon i {
+      color: white;
+      font-size: 18px;
+    }
+
+    .trip-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .trip-info h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trip-info p {
+      font-size: 12px;
+      color: var(--text-light);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .trip-meta {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .trip-meta .fare {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--success);
+    }
+
+    .trip-meta .date {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 2px;
+    }
+
+    /* Wallet */
+    .wallet-balance {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 50%, #1e40af 100%);
+      border-radius: 20px;
+      padding: 28px;
+      color: white;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wallet-balance::before {
+      content: '';
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 120px;
+      height: 120px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+
+    .wallet-balance::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: -20px;
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 50%;
+    }
+
+    .wallet-balance .label {
+      font-size: 12px;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .wallet-balance .amount {
+      font-size: 36px;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+
+    .wallet-actions {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .wallet-actions .btn {
+      flex: 1;
+      padding: 14px;
+      font-size: 14px;
+    }
+
+    .tx-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tx-item {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .tx-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .tx-icon.income {
+      background: rgba(16,185,129,0.1);
+      color: var(--success);
+    }
+
+    .tx-icon.out {
+      background: rgba(239,68,68,0.1);
+      color: var(--danger);
+    }
+
+    .tx-info {
+      flex: 1;
+    }
+
+    .tx-info h4 {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .tx-info p {
+      font-size: 11px;
+      color: var(--text-light);
+      margin-top: 1px;
+    }
+
+    .tx-amount {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .tx-amount.in {
+      color: var(--success);
+    }
+
+    .tx-amount.out {
+      color: var(--danger);
+    }
+
+    /* Profile */
+    .profile-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: white;
+      padding: 32px 20px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 180px;
+      height: 180px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .profile-avatar {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 4px solid rgba(255,255,255,0.3);
+      object-fit: cover;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-header h3 {
+      font-size: 20px;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-header p {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: rgba(255,255,255,0.1);
+      margin: -20px 20px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+      backdrop-filter: blur(10px);
+    }
+
+    .profile-stat {
+      background: rgba(255,255,255,0.95);
+      padding: 16px 8px;
+      text-align: center;
+    }
+
+    .profile-stat .val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .profile-stat .lbl {
+      font-size: 10px;
+      color: var(--text-light);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .menu-list {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px;
+      background: var(--card);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .menu-item:active {
+      background: #f1f5f9;
+    }
+
+    .menu-item i:first-child {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      color: var(--primary);
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .menu-item .flex-1 {
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .menu-item i:last-child {
+      color: var(--text-light);
+      font-size: 12px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--text);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 2000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+      max-width: 90%;
+      text-align: center;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Animations for content */
+    .anim-fade {
+      animation: fadeIn 0.4s ease;
+    }
+
+    .anim-slide {
+      animation: slideUp 0.4s ease;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-light);
+    }
+
+    .empty-state i {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.3;
+    }
+
+    .empty-state h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .empty-state p {
+      font-size: 13px;
+    }
+
+    /* Responsive */
+    @media (max-width: 380px) {
+      .auth-container {
+        padding: 24px 16px;
+      }
+      .order-actions {
+        padding: 0 16px 20px;
+      }
+      .order-details {
+        padding: 16px 16px;
+      }
+    }
+
+    /* Selection color */
+    ::selection {
+      background: var(--accent);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-frame">
+
+  <!-- ========== SPLASH SCREEN ========== -->
+  <div class="screen active" id="splash-screen">
+    <div class="splash-logo">
+      <i class="fas fa-taxi"></i>
+      <h1>DROXY RIDE</h1>
+      <p>Driver Partner</p>
+    </div>
+    <div class="splash-loader">
+      <div class="splash-loader-track">
+        <div class="splash-loader-bar"></div>
+      </div>
+      <p class="splash-loader-text">Memuat aplikasi...</p>
+    </div>
+  </div>
+
+  <!-- ========== LOGIN SCREEN ========== -->
+  <div class="screen" id="login-screen">
+    <div class="auth-container">
+      <div class="auth-header">
+        <div class="icon-circle">
+          <i class="fas fa-taxi"></i>
+        </div>
+        <h2>Selamat Datang</h2>
+        <p>Masuk sebagai Driver DROXY RIDE</p>
+      </div>
+
+      <div id="login-step-1">
+        <div class="form-group">
+          <label class="form-label">Nomor HP</label>
+          <div class="input-with-icon">
+            <i class="fas fa-phone"></i>
+            <input type="tel" class="form-input" id="login-phone" placeholder="08xx xxxx xxxx" maxlength="15">
+          </div>
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="sendOTP()">
+          <i class="fas fa-paper-plane"></i>
+          Kirim Kode OTP
+        </button>
+      </div>
+
+      <div id="login-step-2" style="display:none;">
+        <div style="text-align:center; margin-bottom:20px;">
+          <p style="font-size:13px; color:var(--text-light);">Kode OTP dikirim ke <strong id="otp-phone-display"></strong></p>
+        </div>
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-digit" data-index="0">
+          <input type="text" maxlength="1" class="otp-digit" data-index="1">
+          <input type="text" maxlength="1" class="otp-digit" data-index="2">
+          <input type="text" maxlength="1" class="otp-digit" data-index="3">
+          <input type="text" maxlength="1" class="otp-digit" data-index="4">
+          <input type="text" maxlength="1" class="otp-digit" data-index="5">
+        </div>
+        <button class="btn btn-primary btn-lg" onclick="verifyOTP()">
+          <i class="fas fa-check"></i>
+          Verifikasi
+        </button>
+        <p style="text-align:center; margin-top:16px; font-size:13px; color:var(--text-light);">
+          Tidak menerima? <a href="#" onclick="sendOTP(); return false;" style="color:var(--accent); font-weight:600;">Kirim ulang</a>
+        </p>
+      </div>
+
+      <div class="divider">atau</div>
+
+      <button class="btn btn-google btn-lg" onclick="loginGoogle()">
+        <i class="fab fa-google"></i>
+        Masuk dengan Google
+      </button>
+
+      <div class="auth-footer">
+        Belum punya akun? <a href="#" onclick="showScreen('register-screen'); return false;">Daftar Sekarang</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REGISTER SCREEN ========== -->
+  <div class="screen" id="register-screen">
+    <div class="auth-container">
+      <div class="auth-header">
+        <div class="icon-circle">
+          <i class="fas fa-user-plus"></i>
+        </div>
+        <h2>Daftar Driver</h2>
+        <p>Lengkapi data Anda untuk bergabung</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap</label>
+        <div class="input-with-icon">
+          <i class="fas fa-user"></i>
+          <input type="text" class="form-input" id="reg-name" placeholder="Nama sesuai KTP">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nomor HP</label>
+        <div class="input-with-icon">
+          <i class="fas fa-phone"></i>
+          <input type="tel" class="form-input" id="reg-phone" placeholder="08xx xxxx xxxx">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Foto Profil</label>
+        <div class="upload-box" onclick="document.getElementById('reg-photo').click()">
+          <i class="fas fa-camera"></i>
+          <p>Ketuk untuk upload foto</p>
+        </div>
+        <input type="file" id="reg-photo" accept="image/*" style="display:none;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Foto KTP</label>
+        <div class="upload-box" onclick="document.getElementById('reg-ktp').click()">
+          <i class="fas fa-id-card"></i>
+          <p>Ketuk untuk upload KTP</p>
+        </div>
+        <input type="file" id="reg-ktp" accept="image/*" style="display:none;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Foto SIM</label>
+        <div class="upload-box" onclick="document.getElementById('reg-sim').click()">
+          <i class="fas fa-id-badge"></i>
+          <p>Ketuk untuk upload SIM</p>
+        </div>
+        <input type="file" id="reg-sim" accept="image/*" style="display:none;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Jenis Kendaraan</label>
+        <select class="form-input" id="reg-vehicle-type" style="cursor:pointer;">
+          <option value="">Pilih kendaraan</option>
+          <option value="motor">Motor</option>
+          <option value="mobil">Mobil</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Plat Kendaraan</label>
+        <div class="input-with-icon">
+          <i class="fas fa-car"></i>
+          <input type="text" class="form-input" id="reg-plat" placeholder="B 1234 XYZ">
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg" onclick="registerDriver()" style="margin-bottom:16px;">
+        <i class="fas fa-check-circle"></i>
+        Daftar Sekarang
+      </button>
+
+      <div class="auth-footer">
+        Sudah punya akun? <a href="#" onclick="showScreen('login-screen'); return false;">Masuk</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HOME SCREEN ========== -->
+  <div class="screen" id="home-screen">
+    <div class="map-container">
+      <div class="map-bg"></div>
+      <div class="map-roads" id="map-roads"></div>
+      
+      <!-- GPS pulses -->
+      <div class="gps-pulse"></div>
+      <div class="gps-pulse"></div>
+
+      <!-- Driver marker -->
+      <div class="driver-marker" id="driver-marker">
+        <div class="driver-marker-inner">
+          <i class="fas fa-taxi"></i>
+        </div>
+      </div>
+
+      <!-- Top bar -->
+      <div class="home-top-bar">
+        <div class="profile-pill" onclick="showScreen('profile-screen')">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Driver" id="home-avatar">
+          <div class="info">
+            <div class="name" id="home-driver-name">Budi Santoso</div>
+            <div class="rating"><i class="fas fa-star"></i> 4.9</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gps-badge">
+        <div class="dot"></div>
+        <span>GPS Aktif</span>
+      </div>
+    </div>
+
+    <!-- Bottom sheet -->
+    <div class="home-bottom-sheet">
+      <div class="sheet-handle"></div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="label">Pendapatan Hari Ini</div>
+          <div class="value" id="today-earnings">Rp 485.000</div>
+          <div class="sub">12 order selesai</div>
+        </div>
+        <div class="stat-card secondary">
+          <div class="label" style="color:var(--text-light);">Order Hari Ini</div>
+          <div class="value" style="color:var(--primary);">12</div>
+          <div class="sub" style="color:var(--text-light);">3 batal</div>
+        </div>
+      </div>
+      <div class="online-toggle" id="online-toggle" onclick="toggleOnline()">
+        <div>
+          <div class="status-text" id="online-status">ANDA ONLINE</div>
+          <div style="font-size:12px; color:var(--text-light); margin-top:2px;">Siap menerima order</div>
+        </div>
+        <div class="toggle-switch" id="toggle-switch"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <button class="nav-item active" onclick="showTab('home')">
+        <i class="fas fa-home"></i>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item" onclick="showTab('history')">
+        <i class="fas fa-list"></i>
+        <span>Riwayat</span>
+      </button>
+      <button class="nav-item" onclick="showTab('wallet')">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-item" onclick="showTab('profile')">
+        <i class="fas fa-user"></i>
+        <span>Profil</span>
+      </button>
+    </div>
+
+    <!-- Incoming Order Modal -->
+    <div class="modal-overlay" id="order-modal">
+      <div class="order-modal">
+        <div class="order-modal-header">
+          <div class="order-timer">
+            <svg width="44" height="44" viewBox="0 0 100 100">
+              <circle class="bg" cx="50" cy="50" r="45"/>
+              <circle class="progress" cx="50" cy="50" r="45"/>
+            </svg>
+            <div class="time" id="order-timer-text">15</div>
+          </div>
+          <div style="font-size:12px; opacity:0.7; margin-bottom:4px;">ORDER MASUK</div>
+          <div class="order-customer">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face" alt="Customer">
+            <div>
+              <div class="name">Siti Aminah</div>
+              <div class="rating"><i class="fas fa-star"></i> 4.8 - Tunai</div>
+            </div>
+          </div>
+        </div>
+        <div class="order-details">
+          <div class="order-route">
+            <div class="route-line">
+              <div class="route-dot"></div>
+              <div class="route-line-bar"></div>
+              <div class="route-dot dest"></div>
+            </div>
+            <div class="route-info">
+              <div class="place">
+                <h4>Jl. Sudirman No. 45</h4>
+                <p>Thamrin, Jakarta Pusat</p>
+              </div>
+              <div class="place">
+                <h4>Mall Grand Indonesia</h4>
+                <p>Jl. M.H. Thamrin, Jakarta Pusat</p>
+              </div>
+            </div>
+          </div>
+          <div class="order-meta">
+            <div class="meta-item">
+              <i class="fas fa-road"></i>
+              <div class="val">3.2 km</div>
+              <div class="lbl">Jarak</div>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-clock"></i>
+              <div class="val">12 mnt</div>
+              <div class="lbl">Waktu</div>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-tag"></i>
+              <div class="val">Droxy</div>
+              <div class="lbl">Layanan</div>
+            </div>
+          </div>
+          <div class="order-fare">
+            <div class="label">Estimasi Pendapatan</div>
+            <div class="amount">Rp 28.500</div>
+          </div>
+        </div>
+        <div class="order-actions">
+          <button class="btn btn-danger btn-lg" onclick="rejectOrder()">
+            <i class="fas fa-times"></i>
+            Tolak
+          </button>
+          <button class="btn btn-success btn-lg" onclick="acceptOrder()">
+            <i class="fas fa-check"></i>
+            Terima
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== NAVIGATION SCREEN ========== -->
+  <div class="screen" id="nav-screen">
+    <div class="map-container">
+      <div class="map-bg"></div>
+      <div class="map-roads" id="nav-roads"></div>
+
+      <!-- Route markers -->
+      <div id="nav-markers"></div>
+
+      <div class="nav-overlay">
+        <div class="nav-card">
+          <div class="status-badge" id="nav-status">
+            <i class="fas fa-circle"></i>
+            <span>Menuju Lokasi Jemput</span>
+          </div>
+          <div class="nav-dest">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+              <h4 id="nav-dest-name">Jl. Sudirman No. 45</h4>
+              <p id="nav-dest-sub">3.2 km - Estimasi 12 menit</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-bottom">
+        <button class="btn btn-outline btn-lg" onclick="cancelTrip()">
+          <i class="fas fa-phone"></i>
+          Telepon
+        </button>
+        <button class="btn btn-primary btn-lg" id="nav-action-btn" onclick="nextNavStatus()">
+          <i class="fas fa-check"></i>
+          Sampai Lokasi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== HISTORY SCREEN ========== -->
+  <div class="screen" id="history-screen">
+    <div class="page-header">
+      <h2><i class="fas fa-list" style="margin-right:8px;"></i>Riwayat Perjalanan</h2>
+      <p>Semua perjalanan Anda</p>
+    </div>
+    <div class="page-content">
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterHistory('all', this)">Semua</button>
+        <button class="filter-tab" onclick="filterHistory('today', this)">Hari Ini</button>
+        <button class="filter-tab" onclick="filterHistory('week', this)">Minggu Ini</button>
+        <button class="filter-tab" onclick="filterHistory('month', this)">Bulan Ini</button>
+      </div>
+      <div id="history-list"></div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="showTab('home')">
+        <i class="fas fa-home"></i>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item active" onclick="showTab('history')">
+        <i class="fas fa-list"></i>
+        <span>Riwayat</span>
+      </button>
+      <button class="nav-item" onclick="showTab('wallet')">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-item" onclick="showTab('profile')">
+        <i class="fas fa-user"></i>
+        <span>Profil</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== WALLET SCREEN ========== -->
+  <div class="screen" id="wallet-screen">
+    <div class="page-header">
+      <h2><i class="fas fa-wallet" style="margin-right:8px;"></i>Wallet</h2>
+      <p>Kelola pendapatan Anda</p>
+    </div>
+    <div class="page-content">
+      <div class="wallet-balance anim-slide">
+        <div class="label">Total Saldo</div>
+        <div class="amount" id="wallet-balance">Rp 2.845.000</div>
+      </div>
+      <div class="wallet-actions anim-slide" style="animation-delay:0.1s;">
+        <button class="btn btn-primary" onclick="withdraw()">
+          <i class="fas fa-arrow-down"></i>
+          Tarik Saldo
+        </button>
+        <button class="btn btn-outline" onclick="showToast('Fitur top up segera hadir')">
+          <i class="fas fa-plus"></i>
+          Top Up
+        </button>
+      </div>
+      <h3 style="font-size:15px; font-weight:700; margin-bottom:12px; color:var(--text);">Riwayat Transaksi</h3>
+      <div class="tx-list" id="tx-list"></div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="showTab('home')">
+        <i class="fas fa-home"></i>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item" onclick="showTab('history')">
+        <i class="fas fa-list"></i>
+        <span>Riwayat</span>
+      </button>
+      <button class="nav-item active" onclick="showTab('wallet')">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-item" onclick="showTab('profile')">
+        <i class="fas fa-user"></i>
+        <span>Profil</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ========== PROFILE SCREEN ========== -->
+  <div class="screen" id="profile-screen">
+    <div class="profile-header">
+      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face" alt="Profile" class="profile-avatar" id="profile-avatar">
+      <h3 id="profile-name">Budi Santoso</h3>
+      <p id="profile-phone">+62 812-3456-7890</p>
+    </div>
+    <div class="profile-stats anim-slide">
+      <div class="profile-stat">
+        <div class="val">4.9</div>
+        <div class="lbl">Rating</div>
+      </div>
+      <div class="profile-stat">
+        <div class="val">1.247</div>
+        <div class="lbl">Order</div>
+      </div>
+      <div class="profile-stat">
+        <div class="val">98%</div>
+        <div class="lbl">Selesai</div>
+      </div>
+    </div>
+    <div class="page-content" style="padding-top:8px;">
+      <div class="menu-list">
+        <button class="menu-item" onclick="showToast('Data pribadi')">
+          <i class="fas fa-id-card"></i>
+          <span class="flex-1">Data Pribadi</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="menu-item" onclick="showToast('Kendaraan saya')">
+          <i class="fas fa-car"></i>
+          <span class="flex-1">Kendaraan Saya</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="menu-item" onclick="showToast('Dokumen')">
+          <i class="fas fa-file-alt"></i>
+          <span class="flex-1">Dokumen</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="menu-item" onclick="showToast('Pengaturan')">
+          <i class="fas fa-cog"></i>
+          <span class="flex-1">Pengaturan</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="menu-item" onclick="showToast('Bantuan')">
+          <i class="fas fa-question-circle"></i>
+          <span class="flex-1">Bantuan</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="menu-item" onclick="showToast('Kebijakan Privasi')">
+          <i class="fas fa-shield-alt"></i>
+          <span class="flex-1">Kebijakan Privasi</span>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+        <button class="menu-item" onclick="logout()" style="color:var(--danger);">
+          <i class="fas fa-sign-out-alt" style="background:rgba(239,68,68,0.1); color:var(--danger);"></i>
+          <span class="flex-1">Keluar</span>
+          <i class="fas fa-chevron-right" style="color:var(--danger);"></i>
+        </button>
+      </div>
+    </div>
+    <div class="bottom-nav">
+      <button class="nav-item" onclick="showTab('home')">
+        <i class="fas fa-home"></i>
+        <span>Beranda</span>
+      </button>
+      <button class="nav-item" onclick="showTab('history')">
+        <i class="fas fa-list"></i>
+        <span>Riwayat</span>
+      </button>
+      <button class="nav-item" onclick="showTab('wallet')">
+        <i class="fas fa-wallet"></i>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-item active" onclick="showTab('profile')">
+        <i class="fas fa-user"></i>
+        <span>Profil</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ========== STATE ==========
+  let isOnline = true;
+  let orderTimer = null;
+  let orderTimeLeft = 15;
+  let navStatusIndex = 0;
+  let gpsInterval = null;
+  let driverPos = { x: 50, y: 50 };
+
+  const navStatuses = [
+    { text: 'Menuju Lokasi Jemput', btn: 'Sampai Lokasi', icon: 'fa-circle' },
+    { text: 'Menunggu Penumpang', btn: 'Mulai Perjalanan', icon: 'fa-clock' },
+    { text: 'Dalam Perjalanan', btn: 'Selesaikan', icon: 'fa-route' },
+  ];
+
+  const tripHistory = [
+    { id: 1, from: 'Jl. Sudirman No. 45', to: 'Mall Grand Indonesia', fare: 28500, date: 'Hari Ini, 14:30', distance: '3.2 km', status: 'completed' },
+    { id: 2, from: 'Stasiun Gambir', to: 'Bandara Soetta', fare: 145000, date: 'Hari Ini, 10:15', distance: '28 km', status: 'completed' },
+    { id: 3, from: 'Kemang Village', to: 'Senayan City', fare: 42000, date: 'Kemarin, 18:45', distance: '7.5 km', status: 'completed' },
+    { id: 4, from: 'Blok M Square', to: 'Taman Mini', fare: 68000, date: 'Kemarin, 09:20', distance: '15 km', status: 'completed' },
+    { id: 5, from: 'PIK Avenue', to: 'Mall Kelapa Gading', fare: 55000, date: '2 hari lalu', distance: '12 km', status: 'cancelled' },
+    { id: 6, from: 'Kuningan City', to: 'Thamrin City', fare: 22000, date: '2 hari lalu', distance: '2.8 km', status: 'completed' },
+    { id: 7, from: 'Gandaria City', to: 'Pondok Indah Mall', fare: 38000, date: '3 hari lalu', distance: '6 km', status: 'completed' },
+    { id: 8, from: 'Lippo Mall Puri', to: 'Central Park', fare: 31000, date: '3 hari lalu', distance: '5 km', status: 'completed' },
+  ];
+
+  const transactions = [
+    { type: 'in', title: 'Order #DR-8921', desc: 'Jl. Sudirman - Grand Indonesia', amount: 28500, date: 'Hari Ini' },
+    { type: 'in', title: 'Order #DR-8920', desc: 'Gambir - Soetta', amount: 145000, date: 'Hari Ini' },
+    { type: 'out', title: 'Penarikan Saldo', desc: 'Transfer ke BCA', amount: -500000, date: 'Kemarin' },
+    { type: 'in', title: 'Order #DR-8915', desc: 'Kemang - Senayan', amount: 42000, date: 'Kemarin' },
+    { type: 'in', title: 'Bonus Mingguan', desc: 'Bonus 50 order', amount: 100000, date: '2 hari lalu' },
+    { type: 'in', title: 'Order #DR-8908', desc: 'Blok M - Taman Mini', amount: 68000, date: '2 hari lalu' },
+    { type: 'out', title: 'Penarikan Saldo', desc: 'Transfer ke Mandiri', amount: -1000000, date: '3 hari lalu' },
+  ];
+
+  // ========== SPLASH ==========
+  setTimeout(() => {
+    showScreen('login-screen');
+  }, 2800);
+
+  // ========== SCREEN MANAGEMENT ==========
+  function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
+
+  function showTab(tab) {
+    const map = {
+      home: 'home-screen',
+      history: 'history-screen',
+      wallet: 'wallet-screen',
+      profile: 'profile-screen'
+    };
+    showScreen(map[tab]);
+  }
+
+  // ========== LOGIN ==========
+  function sendOTP() {
+    const phone = document.getElementById('login-phone').value;
+    if (!phone || phone.length < 10) {
+      showToast('Masukkan nomor HP yang valid');
+      return;
+    }
+    document.getElementById('otp-phone-display').textContent = phone;
+    document.getElementById('login-step-1').style.display = 'none';
+    document.getElementById('login-step-2').style.display = 'block';
+    showToast('Kode OTP terkirim!');
+    
+    // Auto-fill OTP for demo
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.otp-digit');
+      inputs.forEach((inp, i) => {
+        setTimeout(() => {
+          inp.value = ['1','2','3','4','5','6'][i];
+          inp.style.borderColor = 'var(--success)';
+        }, i * 150);
+      });
+    }, 800);
+  }
+
+  function verifyOTP() {
+    const digits = document.querySelectorAll('.otp-digit');
+    let code = '';
+    digits.forEach(d => code += d.value);
+    if (code.length < 6) {
+      showToast('Masukkan kode OTP lengkap');
+      return;
+    }
+    showToast('Verifikasi berhasil!');
+    setTimeout(() => {
+      showScreen('home-screen');
+      initMap();
+      startGPS();
+      // Simulate incoming order after 5 seconds
+      setTimeout(simulateIncomingOrder, 5000);
+    }, 800);
+  }
+
+  function loginGoogle() {
+    showToast('Masuk dengan Google...');
+    setTimeout(() => {
+      showScreen('home-screen');
+      initMap();
+      startGPS();
+      setTimeout(simulateIncomingOrder, 5000);
+    }, 1200);
+  }
+
+  // ========== REGISTER ==========
+  function registerDriver() {
+    const name = document.getElementById('reg-name').value;
+    const phone = document.getElementById('reg-phone').value;
+    if (!name || !phone) {
+      showToast('Lengkapi semua data');
+      return;
+    }
+    showToast('Pendaftaran berhasil!');
+    setTimeout(() => {
+      showScreen('login-screen');
+    }, 1000);
+  }
+
+  // ========== MAP ==========
+  function initMap() {
+    const container = document.getElementById('map-roads');
+    container.innerHTML = '';
+    
+    // Generate random roads
+    for (let i = 0; i < 8; i++) {
+      const road = document.createElement('div');
+      road.className = 'map-road h';
+      road.style.top = (15 + i * 12) + '%';
+      road.style.left = '0';
+      road.style.right = '0';
+      container.appendChild(road);
+    }
+    for (let i = 0; i < 6; i++) {
+      const road = document.createElement('div');
+      road.className = 'map-road v';
+      road.style.left = (12 + i * 16) + '%';
+      road.style.top = '0';
+      road.style.bottom = '0';
+      container.appendChild(road);
+    }
+    
+    // Buildings
+    for (let i = 0; i < 15; i++) {
+      const b = document.createElement('div');
+      b.className = 'map-building';
+      b.style.left = (5 + Math.random() * 85) + '%';
+      b.style.top = (5 + Math.random() * 85) + '%';
+      b.style.width = (20 + Math.random() * 40) + 'px';
+      b.style.height = (20 + Math.random() * 40) + 'px';
+      container.appendChild(b);
+    }
+    
+    // Parks
+    for (let i = 0; i < 3; i++) {
+      const p = document.createElement('div');
+      p.className = 'map-park';
+      p.style.left = (10 + Math.random() * 70) + '%';
+      p.style.top = (10 + Math.random() * 70) + '%';
+      p.style.width = (40 + Math.random() * 60) + 'px';
+      p.style.height = (30 + Math.random() * 50) + 'px';
+      container.appendChild(p);
+    }
+    
+    // Water
+    const w = document.createElement('div');
+    w.className = 'map-water';
+    w.style.right = '5%';
+    w.style.bottom = '10%';
+    w.style.width = '80px';
+    w.style.height = '60px';
+    container.appendChild(w);
+  }
+
+  // ========== GPS ==========
+  function startGPS() {
+    if (gpsInterval) clearInterval(gpsInterval);
+    gpsInterval = setInterval(() => {
+      // Simulate GPS movement
+      driverPos.x += (Math.random() - 0.5) * 2;
+      driverPos.y += (Math.random() - 0.5) * 2;
+      driverPos.x = Math.max(30, Math.min(70, driverPos.x));
+      driverPos.y = Math.max(30, Math.min(70, driverPos.y));
+      
+      const marker = document.getElementById('driver-marker');
+      if (marker) {
+        marker.style.left = driverPos.x + '%';
+        marker.style.top = driverPos.y + '%';
+      }
+    }, 5000);
+  }
+
+  // ========== ONLINE TOGGLE ==========
+  function toggleOnline() {
+    isOnline = !isOnline;
+    const toggle = document.getElementById('online-toggle');
+    const switchEl = document.getElementById('toggle-switch');
+    const status = document.getElementById('online-status');
+    
+    if (isOnline) {
+      toggle.classList.remove('offline');
+      switchEl.classList.remove('off');
+      status.textContent = 'ANDA ONLINE';
+      showToast('Anda sekarang ONLINE');
+      startGPS();
+    } else {
+      toggle.classList.add('offline');
+      switchEl.classList.add('off');
+      status.textContent = 'ANDA OFFLINE';
+      showToast('Anda sekarang OFFLINE');
+      if (gpsInterval) clearInterval(gpsInterval);
+    }
+  }
+
+  // ========== INCOMING ORDER ==========
+  function simulateIncomingOrder() {
+    if (!isOnline) return;
+    const modal = document.getElementById('order-modal');
+    modal.classList.add('show');
+    orderTimeLeft = 15;
+    updateOrderTimer();
+    
+    orderTimer = setInterval(() => {
+      orderTimeLeft--;
+      updateOrderTimer();
+      if (orderTimeLeft <= 0) {
+        clearInterval(orderTimer);
+        rejectOrder();
+      }
+    }, 1000);
+  }
+
+  function updateOrderTimer() {
+    document.getElementById('order-timer-text').textContent = orderTimeLeft;
+  }
+
+  function acceptOrder() {
+    clearInterval(orderTimer);
+    document.getElementById('order-modal').classList.remove('show');
+    showToast('Order diterima!');
+    setTimeout(() => {
+      showScreen('nav-screen');
+      initNavMap();
+      navStatusIndex = 0;
+      updateNavStatus();
+    }, 600);
+  }
+
+  function rejectOrder() {
+    clearInterval(orderTimer);
+    document.getElementById('order-modal').classList.remove('show');
+    showToast('Order ditolak');
+  }
+
+  // ========== NAVIGATION ==========
+  function initNavMap() {
+    const container = document.getElementById('nav-roads');
+    container.innerHTML = '';
+    
+    for (let i = 0; i < 6; i++) {
+      const road = document.createElement('div');
+      road.className = 'map-road h';
+      road.style.top = (18 + i * 14) + '%';
+      road.style.left = '0';
+      road.style.right = '0';
+      container.appendChild(road);
+    }
+    for (let i = 0; i < 5; i++) {
+      const road = document.createElement('div');
+      road.className = 'map-road v';
+      road.style.left = (15 + i * 18) + '%';
+      road.style.top = '0';
+      road.style.bottom = '0';
+      container.appendChild(road);
+    }
+    
+    // Route line (simulated)
+    const route = document.createElement('div');
+    route.style.cssText = 'position:absolute; top:30%; left:20%; right:20%; height:4px; background:rgba(59,130,246,0.5); border-radius:2px; z-index:5;';
+    container.appendChild(route);
+    
+    // Pickup marker
+    const pickup = document.createElement('div');
+    pickup.style.cssText = 'position:absolute; top:28%; left:20%; width:16px; height:16px; background:var(--success); border-radius:50%; border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:6; transform:translate(-50%,-50%);';
+    container.appendChild(pickup);
+    
+    // Destination marker
+    const dest = document.createElement('div');
+    dest.style.cssText = 'position:absolute; top:28%; right:20%; width:16px; height:16px; background:var(--danger); border-radius:50%; border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:6; transform:translate(50%,-50%);';
+    container.appendChild(dest);
+  }
+
+  function updateNavStatus() {
+    const status = navStatuses[navStatusIndex];
+    const badge = document.getElementById('nav-status');
+    badge.innerHTML = `<i class="fas ${status.icon}"></i><span>${status.text}</span>`;
+    document.getElementById('nav-action-btn').innerHTML = `<i class="fas fa-check"></i> ${status.btn}`;
+  }
+
+  function nextNavStatus() {
+    navStatusIndex++;
+    if (navStatusIndex >= navStatuses.length) {
+      showToast('Perjalanan selesai! +Rp 28.500');
+      // Update earnings
+      const earningsEl = document.getElementById('today-earnings');
+      const current = parseInt(earningsEl.textContent.replace(/\D/g, ''));
+      earningsEl.textContent = 'Rp ' + (current + 28500).toLocaleString('id-ID');
+      
+      setTimeout(() => {
+        showScreen('home-screen');
+        // Add to history
+        tripHistory.unshift({
+          id: Date.now(),
+          from: 'Jl. Sudirman No. 45',
+          to: 'Mall Grand Indonesia',
+          fare: 28500,
+          date: 'Baru saja',
+          distance: '3.2 km',
+          status: 'completed'
+        });
+        renderHistory();
+      }, 1200);
+      return;
+    }
+    updateNavStatus();
+    
+    if (navStatusIndex === 1) {
+      document.getElementById('nav-dest-name').textContent = 'Mall Grand Indonesia';
+      document.getElementById('nav-dest-sub').textContent = '5.8 km - Estimasi 18 menit';
+    }
+  }
+
+  function cancelTrip() {
+    showToast('Menghubungi penumpang...');
+  }
+
+  // ========== HISTORY ==========
+  function renderHistory() {
+    const list = document.getElementById('history-list');
+    if (tripHistory.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-clipboard-list"></i>
+          <h4>Belum ada perjalanan</h4>
+          <p>Mulai terima order untuk melihat riwayat</p>
+        </div>`;
+      return;
+    }
+    
+    list.innerHTML = tripHistory.map((trip, i) => `
+      <div class="trip-card anim-slide" style="animation-delay:${i * 0.05}s;">
+        <div class="trip-icon">
+          <i class="fas fa-${trip.status === 'cancelled' ? 'times' : 'taxi'}"></i>
+        </div>
+        <div class="trip-info">
+          <h4>${trip.to}</h4>
+          <p>${trip.from} - ${trip.distance}</p>
+        </div>
+        <div class="trip-meta">
+          <div class="fare" style="color:${trip.status === 'cancelled' ? 'var(--danger)' : 'var(--success)'}">
+            ${trip.status === 'cancelled' ? '-' : 'Rp ' + trip.fare.toLocaleString('id-ID')}
+          </div>
+          <div class="date">${trip.date}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function filterHistory(filter, btn) {
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderHistory();
+  }
+
+  // ========== WALLET ==========
+  function renderWallet() {
+    const list = document.getElementById('tx-list');
+    list.innerHTML = transactions.map((tx, i) => `
+      <div class="tx-item anim-slide" style="animation-delay:${i * 0.05}s;">
+        <div class="tx-icon ${tx.type}">
+          <i class="fas fa-${tx.type === 'in' ? 'arrow-down' : 'arrow-up'}"></i>
+        </div>
+        <div class="tx-info">
+          <h4>${tx.title}</h4>
+          <p>${tx.desc} - ${tx.date}</p>
+        </div>
+        <div class="tx-amount ${tx.type === 'in' ? 'in' : 'out'}">
+          ${tx.type === 'in' ? '+' : ''}Rp ${Math.abs(tx.amount).toLocaleString('id-ID')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function withdraw() {
+    showToast('Penarikan sedang diproses...');
+  }
+
+  // ========== PROFILE ==========
+  function logout() {
+    showToast('Keluar dari aplikasi...');
+    setTimeout(() => {
+      showScreen('login-screen');
+      document.getElementById('login-step-1').style.display = 'block';
+      document.getElementById('login-step-2').style.display = 'none';
+      document.querySelectorAll('.otp-digit').forEach(i => { i.value = ''; i.style.borderColor = ''; });
+      document.getElementById('login-phone').value = '';
+    }, 1000);
+  }
+
+  // ========== TOAST ==========
+  function showToast(message) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // ========== OTP INPUT HANDLING ==========
+  document.querySelectorAll('.otp-digit').forEach((input, index) => {
+    input.addEventListener('input', function() {
+      if (this.value.length === 1 && index < 5) {
+        document.querySelectorAll('.otp-digit')[index + 1].focus();
+      }
+    });
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Backspace' && this.value === '' && index > 0) {
+        document.querySelectorAll('.otp-digit')[index - 1].focus();
+      }
+    });
+  });
+
+  // ========== INIT ==========
+  renderHistory();
+  renderWallet();
+
+  // File upload handlers
+  ['reg-photo', 'reg-ktp', 'reg-sim'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', function() {
+      if (this.files.length > 0) {
+        showToast('File berhasil dipilih: ' + this.files[0].name);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
